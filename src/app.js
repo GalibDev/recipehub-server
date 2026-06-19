@@ -7,7 +7,7 @@ import rateLimit from 'express-rate-limit';
 import { toNodeHandler } from 'better-auth/node';
 import { connectDatabase } from './config/db.js';
 import { createBetterAuth } from './config/better-auth.js';
-import { env } from './config/env.js';
+import { corsOrigins, env } from './config/env.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import { notFound } from './middleware/not-found.middleware.js';
 import apiRoutes from './routes/index.js';
@@ -22,7 +22,7 @@ export async function createApp() {
   app.use(helmet({ crossOriginResourcePolicy: false }));
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin: corsOrigins,
       credentials: true,
     })
   );

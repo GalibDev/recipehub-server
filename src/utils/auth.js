@@ -2,13 +2,19 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 
 export function getCookieOptions() {
-  return {
+  const options = {
     httpOnly: true,
     sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   };
+
+  if (env.COOKIE_DOMAIN) {
+    options.domain = env.COOKIE_DOMAIN;
+  }
+
+  return options;
 }
 
 export function signAuthToken(user) {
@@ -20,18 +26,18 @@ export function signAuthToken(user) {
     },
     env.JWT_SECRET,
     {
-      expiresIn: '7d',
+      expiresIn: env.JWT_EXPIRES_IN,
       issuer: 'recipehub',
     }
   );
 }
 
 export function issueAuthCookie(res, user) {
-  res.cookie('recipehub_token', signAuthToken(user), getCookieOptions());
+  res.cookie(env.JWT_COOKIE_NAME, signAuthToken(user), getCookieOptions());
 }
 
 export function clearAuthCookie(res) {
-  res.clearCookie('recipehub_token', getCookieOptions());
+  res.clearCookie(env.JWT_COOKIE_NAME, getCookieOptions());
 }
 
 export function serializeUser(user) {

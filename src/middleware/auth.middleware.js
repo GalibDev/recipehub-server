@@ -4,7 +4,7 @@ import { User } from '../models/index.js';
 
 export async function verifyToken(req, res, next) {
   try {
-    const token = req.cookies.recipehub_token;
+    const token = req.cookies[env.JWT_COOKIE_NAME];
 
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });
