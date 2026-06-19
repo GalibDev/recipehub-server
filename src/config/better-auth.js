@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { jwt } from 'better-auth/plugins/jwt';
 import mongoose from 'mongoose';
-import { env } from './env.js';
+import { betterAuthTrustedOrigins, env } from './env.js';
 
 export function createBetterAuth() {
   const socialProviders =
@@ -19,7 +19,7 @@ export function createBetterAuth() {
     basePath: '/api/auth/better',
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: [env.CLIENT_URL],
+    trustedOrigins: betterAuthTrustedOrigins,
     database: mongodbAdapter(mongoose.connection.getClient().db()),
     emailAndPassword: {
       enabled: true,

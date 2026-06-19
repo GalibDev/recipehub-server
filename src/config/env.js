@@ -14,6 +14,7 @@ const envSchema = z.object({
   COOKIE_DOMAIN: z.string().optional().default(''),
   BETTER_AUTH_SECRET: z.string().min(16, 'BETTER_AUTH_SECRET must be at least 16 characters'),
   BETTER_AUTH_URL: z.string().url().default('http://localhost:5000'),
+  BETTER_AUTH_TRUSTED_ORIGINS: z.string().optional().default(''),
   GOOGLE_CLIENT_ID: z.string().optional().default(''),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
   STRIPE_SECRET_KEY: z.string().optional().default(''),
@@ -36,6 +37,13 @@ export const env = parsed.data;
 export const corsOrigins = [
   env.CLIENT_URL,
   ...env.CORS_ORIGINS.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
+
+export const betterAuthTrustedOrigins = [
+  env.CLIENT_URL,
+  ...env.BETTER_AUTH_TRUSTED_ORIGINS.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean),
 ];
