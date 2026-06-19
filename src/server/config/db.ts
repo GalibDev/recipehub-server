@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { env } from './env';
+import { assertRuntimeEnv, env } from './env';
 
 type CachedConnection = {
   conn: typeof mongoose | null;
@@ -18,6 +18,8 @@ const cached = globalForMongoose.mongooseCache ?? {
 globalForMongoose.mongooseCache = cached;
 
 export async function connectDatabase() {
+  assertRuntimeEnv('MONGODB_URI');
+
   if (cached.conn) {
     return cached.conn;
   }

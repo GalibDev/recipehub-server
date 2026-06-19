@@ -2,9 +2,11 @@ import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { jwt } from 'better-auth/plugins';
 import { connectDatabase } from './config/db';
-import { betterAuthTrustedOrigins, env, googleAuthEnabled } from './config/env';
+import { assertRuntimeEnv, betterAuthTrustedOrigins, env, googleAuthEnabled } from './config/env';
 
 export async function createBetterAuth() {
+  assertRuntimeEnv('MONGODB_URI', 'BETTER_AUTH_SECRET');
+
   const mongoose = await connectDatabase();
   const socialProviders = googleAuthEnabled
       ? {

@@ -51,9 +51,19 @@ http://localhost:3000/api/auth/better/callback/google
 For production, replace the domain with your deployed URL and set:
 
 ```env
+NEXT_PUBLIC_API_URL=/api
 NEXT_PUBLIC_APP_URL=https://your-live-site.vercel.app
 BETTER_AUTH_URL=https://your-live-site.vercel.app
 BETTER_AUTH_TRUSTED_ORIGINS=https://your-live-site.vercel.app
+MONGODB_URI=mongodb+srv://username:password@cluster-host/recipehub?retryWrites=true&w=majority
+JWT_SECRET=replace-with-a-long-random-production-secret
+JWT_COOKIE_NAME=recipehub_token
+JWT_EXPIRES_IN=7d
+BETTER_AUTH_SECRET=replace-with-a-long-random-production-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+STRIPE_SECRET_KEY=your-stripe-secret-key
+PREMIUM_PRICE=999
 ```
 
 MongoDB credentials must stay in `MONGODB_URI`; no database secrets are hard-coded.

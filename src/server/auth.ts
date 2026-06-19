@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import { connectDatabase } from './config/db';
-import { env } from './config/env';
+import { assertRuntimeEnv, env } from './config/env';
 import { User, type UserDocument } from './models';
 import { AppError } from './utils/app-error';
 
@@ -35,6 +35,8 @@ export function serializeUser(user: UserDocument): PublicUser {
 }
 
 export function signAuthToken(user: UserDocument) {
+  assertRuntimeEnv('JWT_SECRET');
+
   return jwt.sign(
     {
       sub: String(user._id),
@@ -67,8 +69,6 @@ export async function clearAuthCookie() {
 }
 
 export async function getCurrentUser() {
-  await connectDatabase();
-
   const cookieStore = await cookies();
   const token = cookieStore.get(env.JWT_COOKIE_NAME)?.value;
 
@@ -77,6 +77,8 @@ export async function getCurrentUser() {
   }
 
   try {
+    await connectDatabase();
+
     const payload = jwt.verify(token, env.JWT_SECRET, {
       issuer: 'recipehub',
     }) as AuthPayload;
