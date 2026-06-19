@@ -35,3 +35,5 @@ export const betterAuthTrustedOrigins = [
     .map((origin) => origin.trim())
     .filter(Boolean),
 ];
+
+export const googleAuthEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);

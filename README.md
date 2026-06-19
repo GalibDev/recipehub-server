@@ -42,6 +42,20 @@ PREMIUM_PRICE=999
 NODE_ENV=development
 ```
 
+For Google login, add this redirect URI in Google Cloud Console:
+
+```txt
+http://localhost:3000/api/auth/better/callback/google
+```
+
+For production, replace the domain with your deployed URL and set:
+
+```env
+NEXT_PUBLIC_APP_URL=https://your-live-site.vercel.app
+BETTER_AUTH_URL=https://your-live-site.vercel.app
+BETTER_AUTH_TRUSTED_ORIGINS=https://your-live-site.vercel.app
+```
+
 MongoDB credentials must stay in `MONGODB_URI`; no database secrets are hard-coded.
 
 ## Scripts
