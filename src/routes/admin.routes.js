@@ -13,6 +13,7 @@ import {
 } from '../controllers/admin.controller.js';
 import { verifyAdmin } from '../middleware/admin.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
+import { validateObjectId } from '../middleware/validate-object-id.middleware.js';
 import { asyncHandler } from '../utils/async-handler.js';
 
 const router = Router();
@@ -20,13 +21,13 @@ const router = Router();
 router.use(verifyToken, verifyAdmin);
 router.get('/stats', asyncHandler(getAdminStats));
 router.get('/users', asyncHandler(getUsers));
-router.patch('/users/:id/block', asyncHandler(updateUserBlock));
-router.patch('/users/:id/role', asyncHandler(updateUserRole));
+router.patch('/users/:id/block', validateObjectId('id'), asyncHandler(updateUserBlock));
+router.patch('/users/:id/role', validateObjectId('id'), asyncHandler(updateUserRole));
 router.get('/recipes', asyncHandler(getAdminRecipes));
-router.patch('/recipes/:id/feature', asyncHandler(updateRecipeFeature));
-router.patch('/recipes/:id/status', asyncHandler(updateRecipeStatus));
+router.patch('/recipes/:id/feature', validateObjectId('id'), asyncHandler(updateRecipeFeature));
+router.patch('/recipes/:id/status', validateObjectId('id'), asyncHandler(updateRecipeStatus));
 router.get('/reports', asyncHandler(getReports));
-router.patch('/reports/:id', asyncHandler(updateReport));
+router.patch('/reports/:id', validateObjectId('id'), asyncHandler(updateReport));
 router.get('/payments', asyncHandler(getPayments));
 
 export default router;

@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+const objectId = z.string().regex(/^[a-f\d]{24}$/i, 'Recipe id must be a valid MongoDB id');
+
 export const createReportSchema = z.object({
-  recipeId: z.string().min(1, 'Recipe id is required'),
+  recipeId: objectId,
   reason: z.enum(['Spam', 'Offensive Content', 'Copyright Issue']),
 });
 
