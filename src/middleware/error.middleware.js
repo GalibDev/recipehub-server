@@ -18,8 +18,21 @@ export function errorHandler(err, req, res, next) {
     return res.status(400).json({ message: 'Invalid resource id' });
   }
 
+  if (err instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      issues: Object.values(err.errors).map((issue) => ({
+        path: issue.path,
+        message: issue.message,
+      })),
+    });
+  }
+
   if (err?.code === 11000) {
-    return res.status(409).json({ message: 'Resource already exists' });
+    return res.status(409).json({
+      message: 'Resource already exists',
+      fields: Object.keys(err.keyPattern || {}),
+    });
   }
 
   const statusCode = err.statusCode || 500;
@@ -28,5 +41,8 @@ export function errorHandler(err, req, res, next) {
       ? 'Something went wrong'
       : err.message || 'Something went wrong';
 
-  return res.status(statusCode).json({ message });
+  return res.status(statusCode).json({
+    message,
+    ...(env.NODE_ENV !== 'production' && err.stack ? { stack: err.stack } : {}),
+  });
 }
