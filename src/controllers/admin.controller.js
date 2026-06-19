@@ -3,7 +3,12 @@ import { AppError } from '../utils/app-error.js';
 import { createPaginatedResponse, getPagination } from '../utils/pagination.js';
 import { buildRegexSearch } from '../utils/query.js';
 import { buildRecipeQuery } from './recipe.query.js';
-import { updateBlockSchema, updateFeatureSchema } from '../validations/admin.validation.js';
+import {
+  updateBlockSchema,
+  updateFeatureSchema,
+  updateRecipeStatusSchema,
+  updateRoleSchema,
+} from '../validations/admin.validation.js';
 import { updateReportSchema } from '../validations/report.validation.js';
 
 export async function getAdminStats(req, res) {
@@ -56,6 +61,22 @@ export async function updateUserBlock(req, res) {
   return res.json(user);
 }
 
+export async function updateUserRole(req, res) {
+  const data = updateRoleSchema.parse(req.body);
+
+  if (String(req.user._id) === String(req.params.id) && data.role !== 'admin') {
+    throw new AppError(400, 'You cannot remove your own admin role');
+  }
+
+  const user = await User.findByIdAndUpdate(req.params.id, { role: data.role }, { new: true });
+
+  if (!user) {
+    throw new AppError(404, 'User not found');
+  }
+
+  return res.json(user);
+}
+
 export async function getAdminRecipes(req, res) {
   const { page, limit, skip } = getPagination(req.query, { limit: 10, maxLimit: 50 });
   const filters = buildRecipeQuery(req.query, true);
@@ -73,6 +94,21 @@ export async function updateRecipeFeature(req, res) {
   const recipe = await Recipe.findByIdAndUpdate(
     req.params.id,
     { isFeatured: data.isFeatured },
+    { new: true }
+  );
+
+  if (!recipe) {
+    throw new AppError(404, 'Recipe not found');
+  }
+
+  return res.json(recipe);
+}
+
+export async function updateRecipeStatus(req, res) {
+  const data = updateRecipeStatusSchema.parse(req.body);
+  const recipe = await Recipe.findByIdAndUpdate(
+    req.params.id,
+    { status: data.status },
     { new: true }
   );
 

@@ -7,3 +7,11 @@ export const updateBlockSchema = z.object({
 export const updateFeatureSchema = z.object({
   isFeatured: z.boolean(),
 });
+
+export const updateRoleSchema = z.object({
+  role: z.enum(['user', 'admin']),
+});
+
+export const updateRecipeStatusSchema = z.object({
+  status: z.enum(['published', 'hidden']),
+});
