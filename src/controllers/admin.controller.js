@@ -1,6 +1,7 @@
 import { Payment, Recipe, Report, User } from '../models/index.js';
 import { AppError } from '../utils/app-error.js';
 import { createPaginatedResponse, getPagination } from '../utils/pagination.js';
+import { buildRegexSearch } from '../utils/query.js';
 import { buildRecipeQuery } from './recipe.query.js';
 import { updateBlockSchema, updateFeatureSchema } from '../validations/admin.validation.js';
 import { updateReportSchema } from '../validations/report.validation.js';
@@ -23,10 +24,11 @@ export async function getAdminStats(req, res) {
 
 export async function getUsers(req, res) {
   const { page, limit, skip } = getPagination(req.query, { limit: 10, maxLimit: 50 });
-  const search = req.query.search
+  const searchRegex = req.query.search ? buildRegexSearch(req.query.search) : null;
+  const search = searchRegex
     ? {
         $or: ['name', 'email'].map((field) => ({
-          [field]: { $regex: String(req.query.search), $options: 'i' },
+          [field]: searchRegex,
         })),
       }
     : {};

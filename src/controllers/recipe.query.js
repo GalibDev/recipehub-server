@@ -1,4 +1,4 @@
-import { parseBoolean, splitCsv } from '../utils/query.js';
+import { buildRegexSearch, getFirstQueryValue, parseBoolean, uniqueCsv } from '../utils/query.js';
 
 export function buildRecipeQuery(query, includeHidden = false) {
   const filters = {};
@@ -9,9 +9,9 @@ export function buildRecipeQuery(query, includeHidden = false) {
     filters.status = query.status;
   }
 
-  const categories = splitCsv(query.category);
-  const cuisines = splitCsv(query.cuisine);
-  const difficulty = splitCsv(query.difficulty);
+  const categories = uniqueCsv(getFirstQueryValue(query.categories, query.category));
+  const cuisines = uniqueCsv(getFirstQueryValue(query.cuisines, query.cuisine));
+  const difficulty = uniqueCsv(getFirstQueryValue(query.difficultyLevels, query.difficulty));
   const featured = parseBoolean(query.featured);
 
   if (categories.length) {
@@ -35,11 +35,14 @@ export function buildRecipeQuery(query, includeHidden = false) {
   }
 
   if (query.search) {
+    const searchRegex = buildRegexSearch(query.search);
+
+    if (!searchRegex) {
+      return filters;
+    }
+
     filters.$or = ['recipeName', 'category', 'cuisineType', 'authorName'].map((field) => ({
-      [field]: {
-        $regex: String(query.search),
-        $options: 'i',
-      },
+      [field]: searchRegex,
     }));
   }
 
