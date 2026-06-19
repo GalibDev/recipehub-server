@@ -1,8 +1,10 @@
 export function getPagination(query, defaults = {}) {
-  const page = Math.max(1, Number(query.page) || defaults.page || 1);
+  const rawPage = Number.parseInt(query.page, 10);
+  const rawLimit = Number.parseInt(query.limit, 10);
+  const page = Math.max(1, Number.isFinite(rawPage) ? rawPage : defaults.page || 1);
   const limit = Math.min(
     defaults.maxLimit || 24,
-    Math.max(1, Number(query.limit) || defaults.limit || 10)
+    Math.max(1, Number.isFinite(rawLimit) ? rawLimit : defaults.limit || 10)
   );
 
   return {
@@ -13,10 +15,15 @@ export function getPagination(query, defaults = {}) {
 }
 
 export function createPaginatedResponse({ items, total, page, limit }) {
+  const pages = Math.max(1, Math.ceil(total / limit));
+
   return {
     items,
     total,
     page,
-    pages: Math.max(1, Math.ceil(total / limit)),
+    limit,
+    pages,
+    hasNextPage: page < pages,
+    hasPrevPage: page > 1,
   };
 }
