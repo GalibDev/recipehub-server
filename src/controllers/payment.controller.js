@@ -18,6 +18,23 @@ export async function createCheckoutSession(req, res) {
   }
 
   const membership = !recipe;
+
+  if (recipe && String(recipe.authorId) === String(req.user._id)) {
+    throw new AppError(400, 'You cannot purchase your own recipe');
+  }
+
+  if (recipe) {
+    const existingPurchase = await Payment.exists({
+      userId: req.user._id,
+      recipeId: recipe._id,
+      paymentStatus: 'paid',
+    });
+
+    if (existingPurchase) {
+      throw new AppError(409, 'You already purchased this recipe');
+    }
+  }
+
   const amount = membership ? env.PREMIUM_PRICE : Math.round((recipe.price || 0) * 100);
   const name = membership ? 'RecipeHub Premium Membership' : recipe.recipeName;
 
@@ -60,14 +77,19 @@ export async function confirmPayment(req, res) {
     throw new AppError(400, 'Payment not completed');
   }
 
-  await Payment.findOneAndUpdate(
-    { transactionId: String(session.payment_intent) },
+  const paymentType = session.metadata?.type === 'premium' ? 'premium' : 'recipe';
+  const transactionId = session.payment_intent ? String(session.payment_intent) : session.id;
+
+  const payment = await Payment.findOneAndUpdate(
+    { checkoutSessionId: session.id },
     {
       userEmail: req.user.email,
       userId: req.user._id,
       amount: Number(session.amount_total || 0) / 100,
       recipeId: session.metadata?.recipeId || null,
-      transactionId: String(session.payment_intent),
+      checkoutSessionId: session.id,
+      transactionId,
+      type: paymentType,
       paymentStatus: 'paid',
       paidAt: new Date(),
     },
@@ -84,6 +106,7 @@ export async function confirmPayment(req, res) {
 
   return res.json({
     ok: true,
+    payment,
     user: serializeUser(req.user),
   });
 }

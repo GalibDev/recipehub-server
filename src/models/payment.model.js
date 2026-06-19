@@ -22,10 +22,20 @@ const paymentSchema = new mongoose.Schema(
       ref: 'Recipe',
       default: null,
     },
-    transactionId: {
+    checkoutSessionId: {
       type: String,
       required: true,
       unique: true,
+    },
+    transactionId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    type: {
+      type: String,
+      enum: ['premium', 'recipe'],
+      required: true,
     },
     paymentStatus: {
       type: String,
