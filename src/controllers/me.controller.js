@@ -15,7 +15,7 @@ export async function getMyRecipes(req, res) {
 }
 
 export async function getMyFavorites(req, res) {
-  const { page, limit, skip } = getPagination(req.query, { limit: 6, maxLimit: 24 });
+  const { page, limit, skip } = getPagination(req.query, { limit: 6, maxLimit: 50 });
   const filters = { userId: req.user._id };
 
   const [items, total] = await Promise.all([
