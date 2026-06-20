@@ -11,17 +11,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const { page, limit, skip } = getPagination(searchParams, { limit: 10, maxLimit: 50 });
     const statusValue = searchParams.get('status');
-    const allowedStatuses = ['pending', 'dismissed', 'resolved'] as const;
-    const status = allowedStatuses.some((item) => item === statusValue)
-      ? { status: statusValue as (typeof allowedStatuses)[number] }
-      : {};
+    const status: Record<string, unknown> =
+      statusValue === 'pending'
+        ? { status: 'pending' }
+        : statusValue === 'reviewed'
+          ? { status: { $in: ['dismissed', 'resolved'] } }
+          : {};
 
-    const [items, total] = await Promise.all([
+    const [items, total, pendingReports, reviewedReports, allReports] = await Promise.all([
       Report.find(status).populate('recipeId').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Report.countDocuments(status),
+      Report.countDocuments({ status: 'pending' }),
+      Report.countDocuments({ status: { $in: ['dismissed', 'resolved'] } }),
+      Report.countDocuments(),
     ]);
 
-    return json(createPaginatedResponse({ items, total, page, limit }));
+    return json({
+      ...createPaginatedResponse({ items, total, page, limit }),
+      summary: {
+        pendingReports,
+        reviewedReports,
+        allReports,
+      },
+    });
   } catch (error) {
     return handleApiError(error);
   }
