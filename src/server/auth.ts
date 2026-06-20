@@ -85,7 +85,16 @@ export async function getCurrentUser() {
 
     const user = await User.findById(payload.sub);
 
-    if (!user || user.isBlocked) {
+    if (!user) {
+      return null;
+    }
+
+    if (user.role === 'admin' && user.isBlocked) {
+      user.isBlocked = false;
+      await user.save();
+    }
+
+    if (user.isBlocked) {
       return null;
     }
 

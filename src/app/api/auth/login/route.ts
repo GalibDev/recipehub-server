@@ -16,6 +16,11 @@ export async function POST(request: Request) {
       throw new AppError(401, 'Invalid email or password');
     }
 
+    if (user.role === 'admin' && user.isBlocked) {
+      user.isBlocked = false;
+      await user.save();
+    }
+
     if (user.isBlocked) {
       throw new AppError(403, 'Your account is blocked');
     }
