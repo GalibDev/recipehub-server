@@ -7,9 +7,10 @@ export async function GET() {
   try {
     await connectDatabase();
     const user = await requireUser();
-    const [recipes, favorites, likes, purchases] = await Promise.all([
+    const [recipes, favorites, likedRecipes, likes, purchases] = await Promise.all([
       Recipe.countDocuments({ authorId: user._id }),
       Favorite.countDocuments({ userId: user._id }),
+      Recipe.countDocuments({ likedBy: user._id }),
       Recipe.aggregate([
         { $match: { authorId: user._id } },
         { $group: { _id: null, total: { $sum: '$likesCount' } } },
@@ -20,6 +21,7 @@ export async function GET() {
     return json({
       recipes,
       favorites,
+      likedRecipes,
       likes: likes[0]?.total || 0,
       purchases,
     });

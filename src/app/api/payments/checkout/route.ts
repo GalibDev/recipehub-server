@@ -25,6 +25,10 @@ export async function POST(request: Request) {
 
     const membership = !recipe;
 
+    if (membership && user.isPremium) {
+      throw new AppError(409, 'You are already a premium member');
+    }
+
     if (recipe && String(recipe.authorId) === String(user._id)) {
       throw new AppError(400, 'You cannot purchase your own recipe');
     }
