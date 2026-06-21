@@ -1,6 +1,6 @@
 import { connectDatabase } from '@/server/config/db';
 import { handleApiError, json } from '@/server/api-response';
-import { requireUser } from '@/server/auth';
+import { getCurrentUser, requireUser } from '@/server/auth';
 import { Favorite, Recipe, Report } from '@/server/models';
 import { updateRecipeSchema } from '@/server/validations';
 import { assertObjectId } from '@/server/object-id';
@@ -15,13 +15,17 @@ export async function GET(_request: Request, context: RouteContext) {
     await connectDatabase();
     const { id } = await context.params;
     assertObjectId(id);
+    const user = await getCurrentUser();
     const recipe = await Recipe.findById(id).lean();
 
     if (!recipe) {
       throw new AppError(404, 'Recipe not found');
     }
 
-    return json(recipe);
+    return json({
+      ...recipe,
+      liked: user ? recipe.likedBy.some((userId) => String(userId) === String(user._id)) : false,
+    });
   } catch (error) {
     return handleApiError(error);
   }
